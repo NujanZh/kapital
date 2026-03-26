@@ -11,7 +11,7 @@ public class DBConnection {
     private static final Properties properties = new Properties();
 
     static {
-        try (InputStream in = DBConnection.class.getClassLoader().getResourceAsStream("database.properties")) {
+        try (InputStream in = DBConnection.class.getClassLoader().getResourceAsStream("database/database.properties")) {
             if (in == null) {
                 throw new RuntimeException("Can't find file database.properties");
             }

@@ -5,18 +5,18 @@ import java.time.LocalDateTime;
 
 public class Transaction {
     int id;
-    int categoryId;
+    Category category;
     BigDecimal amount;
     String description;
     LocalDateTime transactionDate;
 
-    public Transaction(int categoryId, BigDecimal amount, String description) {
-        this.categoryId = categoryId;
+    public Transaction(Category category, BigDecimal amount, String description) {
+        this.category= category;
         this.amount = amount;
         this.description = description;
     }
 
-    public Integer getId() {
+    public int getId() {
         return id;
     }
 
@@ -24,12 +24,12 @@ public class Transaction {
         this.id = id;
     }
 
-    public int getCategoryId() {
-        return categoryId;
+    public Category getCategory() {
+        return category;
     }
 
-    public void setCategoryId(int categoryId) {
-        this.categoryId = categoryId;
+    public void setCategory(Category category) {
+        this.category = category;
     }
 
     public BigDecimal getAmount() {

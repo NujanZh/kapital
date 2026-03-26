@@ -1,0 +1,18 @@
+DROP TABLE IF EXISTS transactions;
+DROP TABLE IF EXISTS categories;
+
+CREATE TABLE categories (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE,
+    type ENUM('INCOME', 'EXPENSE') NOT NULL DEFAULT 'EXPENSE'
+);
+
+CREATE TABLE transactions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    category_id INT NOT NULL,
+    amount DECIMAL(12, 2) NOT NULL,
+    description VARCHAR(255),
+    transaction_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_category FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE RESTRICT
+);

@@ -1,5 +1,7 @@
 package data.dao;
 
+import data.entity.Category;
+import data.entity.CategoryType;
 import data.entity.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,14 +13,18 @@ import java.util.List;
 public class TransactionDAO {
 
     private static final Logger logger = LoggerFactory.getLogger(TransactionDAO.class);
+    private final Connection connection;
+
+    public TransactionDAO(Connection connection) {
+        this.connection = connection;
+    }
 
     public void save(Transaction transaction) {
         String sql = "INSERT INTO transactions (category_id, amount, description) VALUES (?, ?, ?)";
 
-        try (Connection connection = DBConnection.getConnection();
-             PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        try (PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-            pstmt.setInt(1, transaction.getCategoryId());
+            pstmt.setInt(1, transaction.getCategory().getId());
             pstmt.setBigDecimal(2, transaction.getAmount());
             pstmt.setString(3, transaction.getDescription());
 
@@ -41,15 +47,22 @@ public class TransactionDAO {
 
     public List<Transaction> findAll() {
         var transactions = new ArrayList<Transaction>();
-        String sql = "SELECT id, category_id, amount, description, transaction_date FROM transactions";
+        String sql = "SELECT t.id, t.category_id, t.amount, t.description, t.transaction_date, c.id as cat_id, c.name, c.type " +
+                "FROM transactions t " +
+                "JOIN categories c ON c.id = t.category_id";
 
-        try (Connection connection = DBConnection.getConnection()) {
-            Statement stmt = connection.createStatement();
-            ResultSet rs = stmt.executeQuery(sql);
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
 
             while (rs.next()) {
+                String categoryString = rs.getString("type");
+                CategoryType categoryType = CategoryType.valueOf(categoryString);
+
+                Category category = new Category(rs.getString("name"), categoryType);
+                category.setId(rs.getInt("cat_id"));
+
                 Transaction t = new Transaction(
-                        rs.getInt("category_id"),
+                        category,
                         rs.getBigDecimal("amount"),
                         rs.getString("description")
                 );
@@ -81,12 +94,10 @@ public class TransactionDAO {
 
         String sql = "UPDATE transactions SET amount = ?, description = ?, category_id = ? WHERE id = ?";
 
-        try (Connection connection = DBConnection.getConnection();
-             PreparedStatement pstmt = connection.prepareStatement(sql)) {
-
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setBigDecimal(1, transaction.getAmount());
             pstmt.setString(2, transaction.getDescription());
-            pstmt.setInt(3, transaction.getCategoryId());
+            pstmt.setInt(3, transaction.getCategory().getId());
             pstmt.setInt(4, transaction.getId());
 
             logger.debug("Executing SQL: {} for transaction ID={}", sql, transaction.getId());
@@ -109,9 +120,7 @@ public class TransactionDAO {
     public void delete(int id) {
         String sql = "DELETE FROM transactions WHERE id = ?";
 
-        try (Connection connection = DBConnection.getConnection();
-             PreparedStatement pstmt = connection.prepareStatement(sql)) {
-
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setInt(1, id);
             int affectedRows = pstmt.executeUpdate();
 

@@ -13,13 +13,16 @@ import java.util.List;
 public class CategoryDAO {
 
     private static final Logger logger = LoggerFactory.getLogger(CategoryDAO.class);
+    private final Connection connection;
+
+    public CategoryDAO(Connection connection) {
+        this.connection = connection;
+    }
 
     public void save(Category category) {
         String sql = "INSERT INTO categories (name, type) VALUES (?,?)";
 
-        try (Connection connection = DBConnection.getConnection();
-             PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-
+        try (PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             pstmt.setString(1, category.getName());
             pstmt.setString(2, category.getType().name());
 
@@ -35,7 +38,7 @@ public class CategoryDAO {
             }
 
         } catch (SQLException e) {
-            logger.error("");
+            throw new RuntimeException("Failed to save category due to a database error", e);
         }
 
     }
@@ -44,9 +47,8 @@ public class CategoryDAO {
         var categories = new ArrayList<Category>();
         String sql = "SELECT id, name, type FROM categories";
 
-        try (Connection connection = DBConnection.getConnection()) {
-            Statement stmt = connection.createStatement();
-            ResultSet rs = stmt.executeQuery(sql);
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
 
             while (rs.next()) {
                 String typeString = rs.getString("type");
@@ -79,8 +81,7 @@ public class CategoryDAO {
 
         String sql = "UPDATE categories SET name = ?, type = ? WHERE id = ?";
 
-        try (Connection connection = DBConnection.getConnection();
-             PreparedStatement pstmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
 
             pstmt.setString(1, category.getName());
             pstmt.setString(2, category.getType().name());
@@ -106,8 +107,7 @@ public class CategoryDAO {
     public void delete(int id) {
         String sql = "DELETE FROM categories WHERE id = ?";
 
-        try (Connection connection = DBConnection.getConnection();
-             PreparedStatement pstmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
 
             pstmt.setInt(1, id);
             int affectedRows = pstmt.executeUpdate();
