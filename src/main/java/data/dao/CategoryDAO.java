@@ -8,23 +8,27 @@ import org.slf4j.LoggerFactory;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 
 public class CategoryDAO {
 
     private static final Logger logger = LoggerFactory.getLogger(CategoryDAO.class);
-    private final Connection connection;
+    private final Supplier<Connection> connectionProvider;
 
-    public CategoryDAO(Connection connection) {
-        this.connection = connection;
+    public CategoryDAO(Supplier<Connection> connectionProvider) {
+        this.connectionProvider = connectionProvider;
     }
 
     public void save(Category category) {
         String sql = "INSERT INTO categories (name, type) VALUES (?,?)";
 
-        try (PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        try (Connection connection = connectionProvider.get();
+            PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             pstmt.setString(1, category.getName());
             pstmt.setString(2, category.getType().name());
+
+            logger.debug("Executing SQL: {} for category name={}", sql, category.getName());
 
             int affectedRows = pstmt.executeUpdate();
 
@@ -37,6 +41,8 @@ public class CategoryDAO {
                 }
             }
 
+            logger.info("Category with name: {}, saved successfully", category.getName());
+
         } catch (SQLException e) {
             throw new RuntimeException("Failed to save category due to a database error", e);
         }
@@ -47,7 +53,8 @@ public class CategoryDAO {
         var categories = new ArrayList<Category>();
         String sql = "SELECT id, name, type FROM categories";
 
-        try (Statement stmt = connection.createStatement();
+        try (Connection connection = connectionProvider.get();
+             Statement stmt = connection.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
 
             while (rs.next()) {
@@ -81,7 +88,8 @@ public class CategoryDAO {
 
         String sql = "UPDATE categories SET name = ?, type = ? WHERE id = ?";
 
-        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+        try (Connection connection = connectionProvider.get();
+            PreparedStatement pstmt = connection.prepareStatement(sql)) {
 
             pstmt.setString(1, category.getName());
             pstmt.setString(2, category.getType().name());
@@ -107,7 +115,8 @@ public class CategoryDAO {
     public void delete(int id) {
         String sql = "DELETE FROM categories WHERE id = ?";
 
-        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+        try (Connection connection = connectionProvider.get();
+            PreparedStatement pstmt = connection.prepareStatement(sql)) {
 
             pstmt.setInt(1, id);
             int affectedRows = pstmt.executeUpdate();

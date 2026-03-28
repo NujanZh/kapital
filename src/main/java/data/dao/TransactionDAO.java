@@ -9,20 +9,22 @@ import org.slf4j.LoggerFactory;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 public class TransactionDAO {
 
     private static final Logger logger = LoggerFactory.getLogger(TransactionDAO.class);
-    private final Connection connection;
+    private final Supplier<Connection> connectionSupplier;
 
-    public TransactionDAO(Connection connection) {
-        this.connection = connection;
+    public TransactionDAO(Supplier<Connection> connectionSupplier) {
+        this.connectionSupplier = connectionSupplier;
     }
 
     public void save(Transaction transaction) {
         String sql = "INSERT INTO transactions (category_id, amount, description) VALUES (?, ?, ?)";
 
-        try (PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        try (Connection connection = connectionSupplier.get();
+             PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             pstmt.setInt(1, transaction.getCategory().getId());
             pstmt.setBigDecimal(2, transaction.getAmount());
@@ -51,7 +53,8 @@ public class TransactionDAO {
                 "FROM transactions t " +
                 "JOIN categories c ON c.id = t.category_id";
 
-        try (Statement stmt = connection.createStatement();
+        try (Connection connection = connectionSupplier.get();
+             Statement stmt = connection.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
 
             while (rs.next()) {
@@ -94,7 +97,8 @@ public class TransactionDAO {
 
         String sql = "UPDATE transactions SET amount = ?, description = ?, category_id = ? WHERE id = ?";
 
-        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+        try (Connection connection = connectionSupplier.get();
+             PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setBigDecimal(1, transaction.getAmount());
             pstmt.setString(2, transaction.getDescription());
             pstmt.setInt(3, transaction.getCategory().getId());
@@ -120,7 +124,8 @@ public class TransactionDAO {
     public void delete(int id) {
         String sql = "DELETE FROM transactions WHERE id = ?";
 
-        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+        try (Connection connection = connectionSupplier.get();
+             PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setInt(1, id);
             int affectedRows = pstmt.executeUpdate();
 
