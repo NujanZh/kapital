@@ -36,8 +36,7 @@ public class TransactionDAOImpl implements TransactionRepository {
             if (affectedRows > 0) {
                 try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
                     if (generatedKeys.next()) {
-                        int columnIndex = 1;
-                        transaction.setId(generatedKeys.getInt(columnIndex));
+                        transaction.setId(generatedKeys.getInt(1));
                     }
                 }
             }
@@ -91,11 +90,6 @@ public class TransactionDAOImpl implements TransactionRepository {
     }
 
     public boolean update(Transaction transaction) {
-        if (transaction.getId() <= 0) {
-            logger.warn("Attempt to update with invalid user ID: {}", transaction.getId());
-            throw new IllegalArgumentException("Id must be positive number");
-        }
-
         String sql = "UPDATE transactions SET amount = ?, description = ?, category_id = ? WHERE id = ?";
 
         try (Connection connection = connectionSupplier.get();

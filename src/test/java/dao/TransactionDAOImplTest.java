@@ -71,7 +71,7 @@ class TransactionDAOImplTest {
     }
 
     @Test
-    @DisplayName("Should return all saved categories")
+    @DisplayName("Should return all saved transactions")
     void shouldFindAllTransactions() {
         Category category = new Category("Groceries", CategoryType.EXPENSE);
         categoryDAO.save(category);

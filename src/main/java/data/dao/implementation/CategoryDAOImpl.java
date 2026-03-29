@@ -36,8 +36,7 @@ public class CategoryDAOImpl implements CategoryRepository {
             if (affectedRows > 0) {
                 try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
                     if (generatedKeys.next()) {
-                        int columnIndex = 1;
-                        category.setId(generatedKeys.getInt(columnIndex));
+                        category.setId(generatedKeys.getInt(1));
                     }
                 }
             }
@@ -82,11 +81,6 @@ public class CategoryDAOImpl implements CategoryRepository {
     }
     
     public boolean update(Category category) {
-        if (category.getId() <= 0) {
-            logger.warn("Attempt to update with invalid user ID: {}", category.getId());
-            throw new IllegalArgumentException("Id must be positive number");
-        }
-
         String sql = "UPDATE categories SET name = ?, type = ? WHERE id = ?";
 
         try (Connection connection = connectionProvider.get();

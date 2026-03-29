@@ -12,6 +12,7 @@ public class Transaction {
 
     public Transaction(Category category, BigDecimal amount, String description) {
         if (category == null) throw new IllegalArgumentException("Category must be valid");
+        if (category.getId() <= 0) throw new IllegalArgumentException("Category ID must be positive");
         if (amount == null) throw new IllegalArgumentException("Amount must be positive");
         if (amount.compareTo(BigDecimal.ZERO) <= 0) throw new IllegalArgumentException("Amount must be positive");
         if (description == null || description.trim().isEmpty()) throw new IllegalArgumentException("Description cannot be empty");
@@ -25,7 +26,7 @@ public class Transaction {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(int id) {
         this.id = id;
     }
 
