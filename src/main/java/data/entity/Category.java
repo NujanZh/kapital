@@ -6,6 +6,9 @@ public class Category {
     CategoryType type;
 
     public Category(String name, CategoryType type) {
+        if (name == null || name.trim().isEmpty()) throw new IllegalArgumentException("Name cannot be empty");
+        if (type == null) throw new IllegalArgumentException("Type cannot be null");
+
         this.name = name;
         this.type = type;
     }

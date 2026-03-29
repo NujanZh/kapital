@@ -11,6 +11,11 @@ public class Transaction {
     LocalDateTime transactionDate;
 
     public Transaction(Category category, BigDecimal amount, String description) {
+        if (category == null) throw new IllegalArgumentException("Category must be valid");
+        if (amount == null) throw new IllegalArgumentException("Amount must be positive");
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) throw new IllegalArgumentException("Amount must be positive");
+        if (description == null || description.trim().isEmpty()) throw new IllegalArgumentException("Description cannot be empty");
+
         this.category= category;
         this.amount = amount;
         this.description = description;

@@ -6,6 +6,8 @@ import data.entity.CategoryType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+
 public class CategoryService {
 
     private static final Logger logger = LoggerFactory.getLogger(CategoryService.class);
@@ -18,20 +20,44 @@ public class CategoryService {
     public Category createCategory(String name, CategoryType type) {
         logger.debug("Attempting to create category: {} with type {}", name, type);
 
-        if (name == null || name.trim().isEmpty()) {
-            logger.warn("Category creation failed: name is null or empty");
-            throw new IllegalArgumentException("Name cannot be empty");
-        }
-
-        if (type == null) {
-            logger.warn("Category creation failed: type is null");
-            throw new IllegalArgumentException("Type cannot be null");
-        }
-
         Category category = new Category(name.trim(), type);
         categoryDAO.save(category);
 
         logger.info("Category created successfully: {}", category);
         return category;
+    }
+
+    public List<Category> getAllCategories() {
+        logger.debug("Attempting to get all categories");
+        return categoryDAO.findAll();
+    }
+
+    public boolean updateCategory(Category category) {
+        logger.debug("Attempting to update category");
+
+        if (category == null) {
+            logger.warn("Update failed: category object is null");
+            throw new IllegalArgumentException("Category cannot be null");
+        }
+
+        if (category.getId() <= 0) {
+            logger.warn("Update failed: invalid category ID: {}", category.getId());
+            throw new IllegalArgumentException("Category ID must be positive number");
+        }
+
+        category.setName(category.getName().trim());
+
+        return categoryDAO.update(category);
+    }
+
+    public void deleteCategory(int id) {
+        logger.debug("Attempting to delete category with ID: {}", id);
+
+        if (id <= 0) {
+            logger.warn("Delete failed: invalid category ID: {}", id);
+            throw new IllegalArgumentException("Category ID must be positive number");
+        }
+
+        categoryDAO.delete(id);
     }
 }
