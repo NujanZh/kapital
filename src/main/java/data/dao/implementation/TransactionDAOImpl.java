@@ -1,5 +1,6 @@
-package data.dao;
+package data.dao.implementation;
 
+import data.dao.repository.TransactionRepository;
 import data.entity.Category;
 import data.entity.CategoryType;
 import data.entity.Transaction;
@@ -11,12 +12,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-public class TransactionDAO {
+public class TransactionDAOImpl implements TransactionRepository {
 
-    private static final Logger logger = LoggerFactory.getLogger(TransactionDAO.class);
+    private static final Logger logger = LoggerFactory.getLogger(TransactionDAOImpl.class);
     private final Supplier<Connection> connectionSupplier;
 
-    public TransactionDAO(Supplier<Connection> connectionSupplier) {
+    public TransactionDAOImpl(Supplier<Connection> connectionSupplier) {
         this.connectionSupplier = connectionSupplier;
     }
 
@@ -43,7 +44,7 @@ public class TransactionDAO {
 
             logger.info("Transaction with id: {}, saved successfully", transaction.getId());
         } catch (SQLException e) {
-            logger.error("Error saving transaction: {}", e.getMessage());
+            throw new RuntimeException("Failed to save transaction due to a database error", e);
         }
     }
 
@@ -83,7 +84,7 @@ public class TransactionDAO {
             logger.info("Successfully got {} transactions from DB", transactions.size());
 
         } catch (SQLException e) {
-            logger.error("Error while getting transactions: ", e);
+            throw new RuntimeException("Failed to get transactions due to a database error", e);
         }
 
         return transactions;
@@ -136,7 +137,7 @@ public class TransactionDAO {
             }
 
         } catch (SQLException e) {
-            logger.error("Error deleting transaction: {}", e.getMessage());
+            throw new RuntimeException("Failed to delete transaction due to a database error", e);
         }
     }
 }

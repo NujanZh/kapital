@@ -1,6 +1,6 @@
 package dao;
 
-import data.dao.CategoryDAO;
+import data.dao.implementation.CategoryDAOImpl;
 import data.entity.Category;
 import data.entity.CategoryType;
 import org.junit.jupiter.api.AfterEach;
@@ -17,10 +17,10 @@ import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.*;
 
-class CategoryDAOTest {
+class CategoryDAOImplTest {
 
     private Connection keepAliveConnection;
-    private CategoryDAO categoryDAO;
+    private CategoryDAOImpl categoryDAOImpl;
 
     @BeforeEach
     void setUp() throws SQLException {
@@ -49,7 +49,7 @@ class CategoryDAOTest {
             }
         };
 
-        categoryDAO = new CategoryDAO(connectionSupplier);
+        categoryDAOImpl = new CategoryDAOImpl(connectionSupplier);
     }
 
     @AfterEach
@@ -67,7 +67,7 @@ class CategoryDAOTest {
     @DisplayName("Should successfully save a category and assign a generated ID")
     void shouldSaveCategory() {
         Category category = new Category("Food", CategoryType.EXPENSE);
-        categoryDAO.save(category);
+        categoryDAOImpl.save(category);
         assertThat(category.getId())
                 .as("The generated ID should be greater than 0")
                 .isGreaterThan(0);
@@ -78,8 +78,8 @@ class CategoryDAOTest {
     void shouldThrowExceptionWhenOnDuplicateName() {
         Category first = new Category("Food", CategoryType.EXPENSE);
         Category second = new Category("Food", CategoryType.EXPENSE);
-        categoryDAO.save(first);
-        assertThatThrownBy(() -> categoryDAO.save(second))
+        categoryDAOImpl.save(first);
+        assertThatThrownBy(() -> categoryDAOImpl.save(second))
                 .as("Database should prevent duplicate names via UNIQUE constraint")
                 .isInstanceOf(RuntimeException.class);
     }
@@ -87,10 +87,10 @@ class CategoryDAOTest {
     @Test
     @DisplayName("Should return all saved categories")
     void shouldFindAllCategories() {
-        categoryDAO.save(new Category("Food", CategoryType.EXPENSE));
-        categoryDAO.save(new Category("Transport", CategoryType.EXPENSE));
+        categoryDAOImpl.save(new Category("Food", CategoryType.EXPENSE));
+        categoryDAOImpl.save(new Category("Transport", CategoryType.EXPENSE));
 
-        List<Category> categories = categoryDAO.findAll();
+        List<Category> categories = categoryDAOImpl.findAll();
 
         assertThat(categories)
                 .hasSize(2)
@@ -102,14 +102,14 @@ class CategoryDAOTest {
     @DisplayName("Should successfully update an existing category")
     void shouldUpdateCategory() {
         Category category = new Category("Food", CategoryType.EXPENSE);
-        categoryDAO.save(category);
+        categoryDAOImpl.save(category);
 
         category.setName("Fine Dining");
-        boolean isUpdated = categoryDAO.update(category);
+        boolean isUpdated = categoryDAOImpl.update(category);
 
         assertThat(isUpdated).isTrue();
 
-        Category found = categoryDAO.findAll().getFirst();
+        Category found = categoryDAOImpl.findAll().getFirst();
         assertThat(found.getName()).isEqualTo("Fine Dining");
     }
 
@@ -119,7 +119,7 @@ class CategoryDAOTest {
         Category nonExistent = new Category("Non-existent", CategoryType.EXPENSE);
         nonExistent.setId(12345);
 
-        boolean isUpdated = categoryDAO.update(nonExistent);
+        boolean isUpdated = categoryDAOImpl.update(nonExistent);
 
         assertThat(isUpdated).isFalse();
     }
@@ -128,8 +128,8 @@ class CategoryDAOTest {
     @DisplayName("Should delete a category by its ID")
     void shouldDeleteCategory() {
         Category category = new Category("Food", CategoryType.EXPENSE);
-        categoryDAO.save(category);
-        categoryDAO.delete(category.getId());
-        assertThat(categoryDAO.findAll()).isEmpty();
+        categoryDAOImpl.save(category);
+        categoryDAOImpl.delete(category.getId());
+        assertThat(categoryDAOImpl.findAll()).isEmpty();
     }
 }

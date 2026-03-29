@@ -1,6 +1,6 @@
 package data.service;
 
-import data.dao.TransactionDAO;
+import data.dao.implementation.TransactionDAOImpl;
 import data.entity.Category;
 import data.entity.CategoryType;
 import data.entity.Transaction;
@@ -18,23 +18,23 @@ import java.util.stream.Collectors;
 public class TransactionService {
 
     private static final Logger logger = LoggerFactory.getLogger(TransactionService.class);
-    private final TransactionDAO transactionDAO;
+    private final TransactionDAOImpl transactionDAOImpl;
 
-    public TransactionService(TransactionDAO transactionDAO) {
-        this.transactionDAO = transactionDAO;
+    public TransactionService(TransactionDAOImpl transactionDAOImpl) {
+        this.transactionDAOImpl = transactionDAOImpl;
     }
 
     public Transaction createTransaction(Category category, BigDecimal amount, String description) {
         logger.debug("Attempting to create new transaction");
 
         Transaction transaction = new Transaction(category, amount, description);
-        transactionDAO.save(transaction);
+        transactionDAOImpl.save(transaction);
         return transaction;
     }
 
     public List<Transaction> getAllTransactions() {
         logger.debug("Attempting to get all transactions");
-        return transactionDAO.findAll();
+        return transactionDAOImpl.findAll();
     }
 
     public boolean updateTransaction(Transaction transaction) {
@@ -49,7 +49,7 @@ public class TransactionService {
             throw new IllegalArgumentException("Transaction ID must be positive number");
         }
 
-        return transactionDAO.update(transaction);
+        return transactionDAOImpl.update(transaction);
     }
 
     public void deleteTransaction(int id) {
@@ -60,11 +60,11 @@ public class TransactionService {
             throw new IllegalArgumentException("Transaction ID must be positive number");
         }
 
-        transactionDAO.delete(id);
+        transactionDAOImpl.delete(id);
     }
 
     public BigDecimal getExpensesForMonth(int year, Month month) {
-        return transactionDAO.findAll().stream()
+        return transactionDAOImpl.findAll().stream()
                 .filter(t -> t.getCategory().getType() == CategoryType.EXPENSE)
                 .filter(t -> t.getTransactionDate() != null)
                 .filter(t -> t.getTransactionDate().getYear() == year)
@@ -74,13 +74,13 @@ public class TransactionService {
     }
 
     public Optional<Transaction> getLargestExpense() {
-        return transactionDAO.findAll().stream()
+        return transactionDAOImpl.findAll().stream()
                 .filter(t -> t.getCategory().getType() == CategoryType.EXPENSE)
                 .max(Comparator.comparing(Transaction::getAmount));
     }
 
     public Map<String, BigDecimal> getExpensesByCategory() {
-        return transactionDAO.findAll().stream()
+        return transactionDAOImpl.findAll().stream()
                 .filter(t -> t.getCategory().getType() == CategoryType.EXPENSE)
                 .collect(Collectors.groupingBy(
                         t -> t.getCategory().getName(),
@@ -93,7 +93,7 @@ public class TransactionService {
     }
 
     public BigDecimal calculateCurrentBalance() {
-        return transactionDAO.findAll().stream()
+        return transactionDAOImpl.findAll().stream()
                 .map(t -> t.getCategory().getType() == CategoryType.INCOME ?
                         t.getAmount() :
                         t.getAmount().negate()

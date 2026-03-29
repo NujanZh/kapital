@@ -1,7 +1,7 @@
 package dao;
 
-import data.dao.CategoryDAO;
-import data.dao.TransactionDAO;
+import data.dao.implementation.CategoryDAOImpl;
+import data.dao.implementation.TransactionDAOImpl;
 import data.entity.Category;
 import data.entity.CategoryType;
 import data.entity.Transaction;
@@ -20,11 +20,11 @@ import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class TransactionDAOTest {
+class TransactionDAOImplTest {
 
     private Connection keepAliveConnection;
-    private TransactionDAO transactionDAO;
-    private CategoryDAO categoryDAO;
+    private TransactionDAOImpl transactionDAOImpl;
+    private CategoryDAOImpl categoryDAO;
 
     @BeforeEach
     void setUp() throws SQLException {
@@ -41,8 +41,8 @@ class TransactionDAOTest {
             }
         };
 
-        transactionDAO = new TransactionDAO(connectionSupplier);
-        categoryDAO = new CategoryDAO(connectionSupplier);
+        transactionDAOImpl = new TransactionDAOImpl(connectionSupplier);
+        categoryDAO = new CategoryDAOImpl(connectionSupplier);
     }
     
     @AfterEach
@@ -63,7 +63,7 @@ class TransactionDAOTest {
         categoryDAO.save(category);
 
         Transaction transaction = new Transaction(category, new BigDecimal("10.00"), "Test");
-        transactionDAO.save(transaction);
+        transactionDAOImpl.save(transaction);
 
         assertThat(transaction.getId())
                 .as("The generated ID should be greater than 0")
@@ -76,10 +76,10 @@ class TransactionDAOTest {
         Category category = new Category("Groceries", CategoryType.EXPENSE);
         categoryDAO.save(category);
 
-        transactionDAO.save(new Transaction(category, new BigDecimal("10.00"), "Test"));
-        transactionDAO.save(new Transaction(category, new BigDecimal("10.00"), "Test2"));
+        transactionDAOImpl.save(new Transaction(category, new BigDecimal("10.00"), "Test"));
+        transactionDAOImpl.save(new Transaction(category, new BigDecimal("10.00"), "Test2"));
 
-        List<Transaction> categories = transactionDAO.findAll();
+        List<Transaction> categories = transactionDAOImpl.findAll();
 
         assertThat(categories)
                 .hasSize(2)
@@ -94,16 +94,16 @@ class TransactionDAOTest {
         categoryDAO.save(category);
 
         Transaction transaction = new Transaction(category, new BigDecimal("10.00"), "Movie ticket");
-        transactionDAO.save(transaction);
+        transactionDAOImpl.save(transaction);
 
         transaction.setAmount(new BigDecimal("20.00"));
         transaction.setDescription("Movie ticket (For two persons)");
 
-        boolean isUpdated = transactionDAO.update(transaction);
+        boolean isUpdated = transactionDAOImpl.update(transaction);
 
         assertThat(isUpdated).isTrue();
 
-        Transaction found = transactionDAO.findAll().getFirst();
+        Transaction found = transactionDAOImpl.findAll().getFirst();
         assertThat(found.getAmount()).isEqualByComparingTo("20.00");
         assertThat(found.getDescription()).isEqualTo("Movie ticket (For two persons)");
     }
@@ -117,7 +117,7 @@ class TransactionDAOTest {
         Transaction nonExistent = new Transaction(category, new BigDecimal("10.00"), "Bus ticket");
         nonExistent.setId(12345);
 
-        boolean isUpdated = transactionDAO.update(nonExistent);
+        boolean isUpdated = transactionDAOImpl.update(nonExistent);
 
         assertThat(isUpdated).isFalse();
     }
@@ -129,10 +129,10 @@ class TransactionDAOTest {
         categoryDAO.save(category);
 
         Transaction transaction = new Transaction(category, new BigDecimal("10.00"), "Electricity bill");
-        transactionDAO.save(transaction);
+        transactionDAOImpl.save(transaction);
 
-        transactionDAO.delete(transaction.getId());
+        transactionDAOImpl.delete(transaction.getId());
 
-        assertThat(transactionDAO.findAll()).isEmpty();
+        assertThat(transactionDAOImpl.findAll()).isEmpty();
     }
 }

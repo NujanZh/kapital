@@ -1,5 +1,6 @@
-package data.dao;
+package data.dao.implementation;
 
+import data.dao.repository.CategoryRepository;
 import data.entity.Category;
 import data.entity.CategoryType;
 import org.slf4j.Logger;
@@ -11,12 +12,12 @@ import java.util.List;
 import java.util.function.Supplier;
 
 
-public class CategoryDAO {
+public class CategoryDAOImpl implements CategoryRepository {
 
-    private static final Logger logger = LoggerFactory.getLogger(CategoryDAO.class);
+    private static final Logger logger = LoggerFactory.getLogger(CategoryDAOImpl.class);
     private final Supplier<Connection> connectionProvider;
 
-    public CategoryDAO(Supplier<Connection> connectionProvider) {
+    public CategoryDAOImpl(Supplier<Connection> connectionProvider) {
         this.connectionProvider = connectionProvider;
     }
 
@@ -74,7 +75,7 @@ public class CategoryDAO {
             logger.info("Successfully got {} categories from DB", categories.size());
 
         } catch (SQLException e) {
-            logger.error("Error while getting categories: ", e);
+            throw new RuntimeException("Failed to get categories due to a database error", e);
         }
 
         return categories;
@@ -128,7 +129,7 @@ public class CategoryDAO {
             }
 
         } catch (SQLException e) {
-            logger.error("Error deleting category: {}", e.getMessage());
+            throw new RuntimeException("Failed to delete category due to a database error", e);
         }
     }
 }
