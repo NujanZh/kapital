@@ -1,6 +1,6 @@
 package dao;
 
-import data.dao.implementation.CategoryDAOImpl;
+import data.repository.impl.CategoryDAOImpl;
 import data.entity.Category;
 import data.entity.CategoryType;
 import org.junit.jupiter.api.AfterEach;
@@ -114,7 +114,7 @@ class CategoryDAOImplTest {
     }
 
     @Test
-    @DisplayName("Should return false when updateing a non-existent category")
+    @DisplayName("Should return false when updating a non-existent category")
     void shouldReturnFalseOnMissingCategory() {
         Category nonExistent = new Category("Non-existent", CategoryType.EXPENSE);
         nonExistent.setId(12345);

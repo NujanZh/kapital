@@ -1,6 +1,6 @@
-package data.dao.implementation;
+package data.repository.impl;
 
-import data.dao.repository.CategoryRepository;
+import data.repository.CategoryRepository;
 import data.entity.Category;
 import data.entity.CategoryType;
 import org.slf4j.Logger;

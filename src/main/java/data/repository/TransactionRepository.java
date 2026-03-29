@@ -1,4 +1,4 @@
-package data.dao.repository;
+package data.repository;
 
 import data.entity.Transaction;
 

@@ -1,6 +1,6 @@
 package data.service;
 
-import data.dao.implementation.CategoryDAOImpl;
+import data.repository.CategoryRepository;
 import data.entity.Category;
 import data.entity.CategoryType;
 import org.slf4j.Logger;
@@ -11,17 +11,17 @@ import java.util.List;
 public class CategoryService {
 
     private static final Logger logger = LoggerFactory.getLogger(CategoryService.class);
-    private final CategoryDAOImpl categoryDAOImpl;
+    private final CategoryRepository categoryRepository;
 
-    public CategoryService(CategoryDAOImpl categoryDAOImpl) {
-        this.categoryDAOImpl = categoryDAOImpl;
+    public CategoryService(CategoryRepository categoryRepository) {
+        this.categoryRepository = categoryRepository;
     }
 
     public Category createCategory(String name, CategoryType type) {
         logger.debug("Attempting to create category: {} with type {}", name, type);
 
         Category category = new Category(name.trim(), type);
-        categoryDAOImpl.save(category);
+        categoryRepository.save(category);
 
         logger.info("Category created successfully: {}", category);
         return category;
@@ -29,7 +29,7 @@ public class CategoryService {
 
     public List<Category> getAllCategories() {
         logger.debug("Attempting to get all categories");
-        return categoryDAOImpl.findAll();
+        return categoryRepository.findAll();
     }
 
     public boolean updateCategory(Category category) {
@@ -47,7 +47,7 @@ public class CategoryService {
 
         category.setName(category.getName().trim());
 
-        return categoryDAOImpl.update(category);
+        return categoryRepository.update(category);
     }
 
     public void deleteCategory(int id) {
@@ -58,6 +58,6 @@ public class CategoryService {
             throw new IllegalArgumentException("Category ID must be positive number");
         }
 
-        categoryDAOImpl.delete(id);
+        categoryRepository.delete(id);
     }
 }

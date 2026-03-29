@@ -1,6 +1,6 @@
-package data.dao.implementation;
+package data.repository.impl;
 
-import data.dao.repository.TransactionRepository;
+import data.repository.TransactionRepository;
 import data.entity.Category;
 import data.entity.CategoryType;
 import data.entity.Transaction;
