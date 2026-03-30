@@ -64,40 +64,18 @@ public class TransactionService {
     }
 
     public BigDecimal getExpensesForMonth(int year, Month month) {
-        return transactionRepository.findAll().stream()
-                .filter(t -> t.getCategory().getType() == CategoryType.EXPENSE)
-                .filter(t -> t.getTransactionDate() != null)
-                .filter(t -> t.getTransactionDate().getYear() == year)
-                .filter(t -> t.getTransactionDate().getMonth() == month)
-                .map(Transaction::getAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        return transactionRepository.getTotalExpensesByMonthAndYear(year, month);
     }
 
     public Optional<Transaction> getLargestExpense() {
-        return transactionRepository.findAll().stream()
-                .filter(t -> t.getCategory().getType() == CategoryType.EXPENSE)
-                .max(Comparator.comparing(Transaction::getAmount));
+        return transactionRepository.getLargestExpense();
     }
 
     public Map<String, BigDecimal> getExpensesByCategory() {
-        return transactionRepository.findAll().stream()
-                .filter(t -> t.getCategory().getType() == CategoryType.EXPENSE)
-                .collect(Collectors.groupingBy(
-                        t -> t.getCategory().getName(),
-                        Collectors.reducing(
-                                BigDecimal.ZERO,
-                                Transaction::getAmount,
-                                BigDecimal::add
-                        )
-                ));
+        return transactionRepository.getExpensesByCategory();
     }
 
     public BigDecimal calculateCurrentBalance() {
-        return transactionRepository.findAll().stream()
-                .map(t -> t.getCategory().getType() == CategoryType.INCOME ?
-                        t.getAmount() :
-                        t.getAmount().negate()
-                )
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        return transactionRepository.calculateBalance();
     }
 }

@@ -21,6 +21,7 @@ public class CategoryDAOImpl implements CategoryRepository {
         this.connectionProvider = connectionProvider;
     }
 
+    @Override
     public void save(Category category) {
         String sql = "INSERT INTO categories (name, type) VALUES (?,?)";
 
@@ -48,7 +49,8 @@ public class CategoryDAOImpl implements CategoryRepository {
         }
 
     }
-    
+
+    @Override
     public List<Category> findAll() {
         var categories = new ArrayList<Category>();
         String sql = "SELECT id, name, type FROM categories";
@@ -79,7 +81,8 @@ public class CategoryDAOImpl implements CategoryRepository {
 
         return categories;
     }
-    
+
+    @Override
     public boolean update(Category category) {
         String sql = "UPDATE categories SET name = ?, type = ? WHERE id = ?";
 
@@ -107,6 +110,7 @@ public class CategoryDAOImpl implements CategoryRepository {
         }
     }
 
+    @Override
     public void delete(int id) {
         String sql = "DELETE FROM categories WHERE id = ?";
 
