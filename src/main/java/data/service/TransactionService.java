@@ -2,18 +2,15 @@ package data.service;
 
 import data.repository.TransactionRepository;
 import data.entity.Category;
-import data.entity.CategoryType;
 import data.entity.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.time.Month;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class TransactionService {
 
@@ -27,9 +24,8 @@ public class TransactionService {
     public Transaction createTransaction(Category category, BigDecimal amount, String description) {
         logger.debug("Attempting to create new transaction");
 
-        Transaction transaction = new Transaction(category, amount, description);
-        transactionRepository.save(transaction);
-        return transaction;
+        Transaction transaction = Transaction.createNew(category, amount, description);
+        return transactionRepository.save(transaction);
     }
 
     public List<Transaction> getAllTransactions() {

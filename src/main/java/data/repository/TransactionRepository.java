@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Optional;
 
 public interface TransactionRepository {
-    void save(Transaction transaction);
+    Transaction save(Transaction transaction);
     List<Transaction> findAll();
     boolean update(Transaction transaction);
     void delete(int id);

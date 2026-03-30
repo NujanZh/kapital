@@ -23,7 +23,7 @@ public class TransactionDAOImpl implements TransactionRepository {
     }
 
     @Override
-    public void save(Transaction transaction) {
+    public Transaction save(Transaction transaction) {
         String sql = "INSERT INTO transactions (category_id, amount, description) VALUES (?, ?, ?)";
 
         try (Connection connection = connectionSupplier.get();
@@ -38,7 +38,14 @@ public class TransactionDAOImpl implements TransactionRepository {
             if (affectedRows > 0) {
                 try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
                     if (generatedKeys.next()) {
-                        transaction.setId(generatedKeys.getInt(1));
+                        int generatedId = generatedKeys.getInt(1);
+
+                        return Transaction.fromDatabase(
+                                generatedId,
+                                transaction.getCategory(),
+                                transaction.getAmount(),
+                                transaction.getDescription()
+                        );
                     }
                 }
             }
@@ -47,6 +54,8 @@ public class TransactionDAOImpl implements TransactionRepository {
         } catch (SQLException e) {
             throw new RuntimeException("Failed to save transaction due to a database error", e);
         }
+
+        throw new RuntimeException("Save succeeded but no ID was generated");
     }
 
     @Override
@@ -62,12 +71,6 @@ public class TransactionDAOImpl implements TransactionRepository {
 
             while (rs.next()) {
                 Transaction t = mapRowToTransaction(rs);
-
-                Timestamp timestamp = rs.getTimestamp("transaction_date");
-                if (timestamp != null) {
-                    t.setTransactionDate(timestamp.toLocalDateTime());
-                }
-
                 transactions.add(t);
             }
 
@@ -163,8 +166,8 @@ public class TransactionDAOImpl implements TransactionRepository {
     @Override
     public Optional<Transaction> getLargestExpense() {
         String sql = """
-                SELECT t.id, t.category_id, t.amount, t.description, t.transaction_date, 
-                       c.id as cat_id, c.name, c.type 
+                SELECT t.id, t.category_id, t.amount, t.description, t.transaction_date,
+                       c.id as cat_id, c.name, c.type
                 FROM transactions t
                 JOIN categories c ON c.id = t.category_id
                 WHERE c.type = 'EXPENSE'
@@ -218,7 +221,7 @@ public class TransactionDAOImpl implements TransactionRepository {
     public BigDecimal calculateBalance() {
         String sql = """
                 SELECT COALESCE(SUM(
-                    CASE WHEN c.type = 'EXPENSE' THEN t.amount ELSE -t.amount END
+                    IF(c.type = 'INCOME', t.amount, -t.amount)
                 ), 0)
                 FROM transactions t
                 JOIN categories c ON c.id = t.category_id
@@ -244,8 +247,12 @@ public class TransactionDAOImpl implements TransactionRepository {
         Category category = new Category(rs.getString("name"), categoryType);
         category.setId(rs.getInt("cat_id"));
 
-        Transaction t = new Transaction(category, rs.getBigDecimal("amount"), rs.getString("description"));
-        t.setId(rs.getInt("id"));
+        Transaction t = Transaction.fromDatabase(
+                rs.getInt("id"),
+                category,
+                rs.getBigDecimal("amount"),
+                rs.getString("description")
+        );
 
         Timestamp timestamp = rs.getTimestamp("transaction_date");
         if (timestamp != null) {

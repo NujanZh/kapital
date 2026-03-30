@@ -62,10 +62,10 @@ class TransactionDAOImplTest {
         Category category = new Category("Food", CategoryType.EXPENSE);
         categoryDAO.save(category);
 
-        Transaction transaction = new Transaction(category, new BigDecimal("10.00"), "Test");
-        transactionDAOImpl.save(transaction);
 
-        assertThat(transaction.getId())
+        Transaction saved = transactionDAOImpl.save(Transaction.createNew(category, new BigDecimal("10.00"), "Test"));
+
+        assertThat(saved.getId())
                 .as("The generated ID should be greater than 0")
                 .isGreaterThan(0);
     }
@@ -76,8 +76,8 @@ class TransactionDAOImplTest {
         Category category = new Category("Groceries", CategoryType.EXPENSE);
         categoryDAO.save(category);
 
-        transactionDAOImpl.save(new Transaction(category, new BigDecimal("10.00"), "Test"));
-        transactionDAOImpl.save(new Transaction(category, new BigDecimal("10.00"), "Test2"));
+        transactionDAOImpl.save(Transaction.createNew(category, new BigDecimal("10.00"), "Test"));
+        transactionDAOImpl.save(Transaction.createNew(category, new BigDecimal("10.00"), "Test2"));
 
         List<Transaction> categories = transactionDAOImpl.findAll();
 
@@ -93,13 +93,12 @@ class TransactionDAOImplTest {
         Category category = new Category("Entertainment", CategoryType.EXPENSE);
         categoryDAO.save(category);
 
-        Transaction transaction = new Transaction(category, new BigDecimal("10.00"), "Movie ticket");
-        transactionDAOImpl.save(transaction);
+        Transaction saved = transactionDAOImpl.save(Transaction.createNew(category, new BigDecimal("10.00"), "Movie ticket"));
 
-        transaction.setAmount(new BigDecimal("20.00"));
-        transaction.setDescription("Movie ticket (For two persons)");
+        saved.setAmount(new BigDecimal("20.00"));
+        saved.setDescription("Movie ticket (For two persons)");
 
-        boolean isUpdated = transactionDAOImpl.update(transaction);
+        boolean isUpdated = transactionDAOImpl.update(saved);
 
         assertThat(isUpdated).isTrue();
 
@@ -112,11 +111,9 @@ class TransactionDAOImplTest {
     @DisplayName("Should return false when updating a non-existent transaction")
     void shouldReturnFalseOnMissingTransaction() {
         Category category = new Category("Transport", CategoryType.EXPENSE);
-        category.setId(1);
+        categoryDAO.save(category);
 
-        Transaction nonExistent = new Transaction(category, new BigDecimal("10.00"), "Bus ticket");
-        nonExistent.setId(12345);
-
+        Transaction nonExistent = Transaction.fromDatabase(12345, category, new BigDecimal("10.00"), "Bus ticket");
         boolean isUpdated = transactionDAOImpl.update(nonExistent);
 
         assertThat(isUpdated).isFalse();
@@ -128,10 +125,8 @@ class TransactionDAOImplTest {
         Category category = new Category("Utilities", CategoryType.EXPENSE);
         categoryDAO.save(category);
 
-        Transaction transaction = new Transaction(category, new BigDecimal("10.00"), "Electricity bill");
-        transactionDAOImpl.save(transaction);
-
-        transactionDAOImpl.delete(transaction.getId());
+        Transaction saved = transactionDAOImpl.save(Transaction.createNew(category, new BigDecimal("10.00"), "Electricity bill"));
+        transactionDAOImpl.delete(saved.getId());
 
         assertThat(transactionDAOImpl.findAll()).isEmpty();
     }
