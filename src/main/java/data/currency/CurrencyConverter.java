@@ -1,6 +1,7 @@
 package data.currency;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 public class CurrencyConverter {
 
@@ -15,6 +16,6 @@ public class CurrencyConverter {
         if (quote == null || quote.trim().isEmpty()) throw new IllegalArgumentException("Quote currency cannot be empty");
         if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) throw new IllegalArgumentException("Amount must be positive");
 
-        return amount.multiply(exchangeRateClient.getCurrencyRate(base, quote).getRate());
+        return amount.multiply(exchangeRateClient.getCurrencyRate(base, quote).getRate()).setScale(2, RoundingMode.HALF_UP);
     }
 }

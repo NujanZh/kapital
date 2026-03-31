@@ -1,5 +1,7 @@
 package data.entity;
 
+import java.util.Objects;
+
 public class Category {
     private final int id;
     private String name;
@@ -50,5 +52,17 @@ public class Category {
     public void setType(CategoryType type) {
         if (type == null) throw new IllegalArgumentException("Type cannot be null");
         this.type = type;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Category category = (Category) o;
+        return id == category.id && Objects.equals(name, category.name) && type == category.type;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, type);
     }
 }

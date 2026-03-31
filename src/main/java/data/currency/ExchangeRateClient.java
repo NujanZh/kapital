@@ -10,7 +10,7 @@ import java.net.http.HttpResponse;
 
 public class ExchangeRateClient {
 
-    private static final String BASE_URL = "https://api.frankfurter.dev/v2/rate";
+    private static final String BASE_URL = "https://api.frankfurter.dev/v2/rate/";
     private final HttpClient httpClient;
     private final ObjectMapper objectMapper;
 
@@ -21,7 +21,7 @@ public class ExchangeRateClient {
 
     public ExchangeRateResponse getCurrencyRate(String base, String quote) {
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("https://api.frankfurter.dev/v2/rate/" + base + "/" + quote))
+                .uri(URI.create(BASE_URL + base + "/" + quote))
                 .GET()
                 .build();
 

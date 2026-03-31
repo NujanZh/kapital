@@ -2,6 +2,7 @@ package data.entity;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 public class Transaction {
     private final int id;
@@ -76,5 +77,17 @@ public class Transaction {
 
     public void setTransactionDate(LocalDateTime transactionDate) {
         this.transactionDate = transactionDate;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Transaction that = (Transaction) o;
+        return id == that.id && Objects.equals(category, that.category) && Objects.equals(amount, that.amount) && Objects.equals(description, that.description) && Objects.equals(transactionDate, that.transactionDate);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, category, amount, description, transactionDate);
     }
 }
