@@ -10,7 +10,7 @@ public class Transaction {
     private String description;
     private LocalDateTime transactionDate;
 
-    public Transaction(int id, Category category, BigDecimal amount, String description) {
+    private Transaction(int id, Category category, BigDecimal amount, String description) {
         validate(category, amount, description);
         this.id = id;
         this.category= category;

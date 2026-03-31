@@ -5,7 +5,7 @@ public class Category {
     private String name;
     private CategoryType type;
 
-    public Category(int id, String name, CategoryType type) {
+    private Category(int id, String name, CategoryType type) {
         validate(name, type);
         this.id = id;
         this.name = name;
