@@ -40,10 +40,6 @@ public class TransactionService {
             logger.warn("Update failed: transaction object is null");
             throw new IllegalArgumentException("Transaction cannot be null");
         }
-        if (transaction.getId() <= 0) {
-            logger.warn("Update failed: invalid transaction ID: {}", transaction.getId());
-            throw new IllegalArgumentException("Transaction ID must be positive number");
-        }
 
         return transactionRepository.update(transaction);
     }

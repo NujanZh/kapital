@@ -20,11 +20,8 @@ public class CategoryService {
     public Category createCategory(String name, CategoryType type) {
         logger.debug("Attempting to create category: {} with type {}", name, type);
 
-        Category category = new Category(name.trim(), type);
-        categoryRepository.save(category);
-
-        logger.info("Category created successfully: {}", category);
-        return category;
+        Category category = Category.createNew(name.trim(), type);
+        return categoryRepository.save(category);
     }
 
     public List<Category> getAllCategories() {
@@ -38,11 +35,6 @@ public class CategoryService {
         if (category == null) {
             logger.warn("Update failed: category object is null");
             throw new IllegalArgumentException("Category cannot be null");
-        }
-
-        if (category.getId() <= 0) {
-            logger.warn("Update failed: invalid category ID: {}", category.getId());
-            throw new IllegalArgumentException("Category ID must be positive number");
         }
 
         category.setName(category.getName().trim());

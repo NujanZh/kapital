@@ -24,7 +24,7 @@ class TransactionDAOImplTest {
 
     private Connection keepAliveConnection;
     private TransactionDAOImpl transactionDAOImpl;
-    private CategoryDAOImpl categoryDAO;
+    private CategoryDAOImpl categoryDAOImpl;
 
     @BeforeEach
     void setUp() throws SQLException {
@@ -42,7 +42,7 @@ class TransactionDAOImplTest {
         };
 
         transactionDAOImpl = new TransactionDAOImpl(connectionSupplier);
-        categoryDAO = new CategoryDAOImpl(connectionSupplier);
+        categoryDAOImpl = new CategoryDAOImpl(connectionSupplier);
     }
     
     @AfterEach
@@ -59,13 +59,11 @@ class TransactionDAOImplTest {
     @Test
     @DisplayName("Should successfully save a transaction and assign a generated ID")
     void shouldSaveTransaction() {
-        Category category = new Category("Food", CategoryType.EXPENSE);
-        categoryDAO.save(category);
+        Category savedCategory = categoryDAOImpl.save(Category.createNew("Food", CategoryType.EXPENSE));
 
+        Transaction savedTransaction = transactionDAOImpl.save(Transaction.createNew(savedCategory, new BigDecimal("10.00"), "Test"));
 
-        Transaction saved = transactionDAOImpl.save(Transaction.createNew(category, new BigDecimal("10.00"), "Test"));
-
-        assertThat(saved.getId())
+        assertThat(savedTransaction.getId())
                 .as("The generated ID should be greater than 0")
                 .isGreaterThan(0);
     }
@@ -73,15 +71,14 @@ class TransactionDAOImplTest {
     @Test
     @DisplayName("Should return all saved transactions")
     void shouldFindAllTransactions() {
-        Category category = new Category("Groceries", CategoryType.EXPENSE);
-        categoryDAO.save(category);
+        Category savedCategory = categoryDAOImpl.save(Category.createNew("Groceries", CategoryType.EXPENSE));
 
-        transactionDAOImpl.save(Transaction.createNew(category, new BigDecimal("10.00"), "Test"));
-        transactionDAOImpl.save(Transaction.createNew(category, new BigDecimal("10.00"), "Test2"));
+        transactionDAOImpl.save(Transaction.createNew(savedCategory, new BigDecimal("10.00"), "Test"));
+        transactionDAOImpl.save(Transaction.createNew(savedCategory, new BigDecimal("10.00"), "Test2"));
 
-        List<Transaction> categories = transactionDAOImpl.findAll();
+        List<Transaction> transactions = transactionDAOImpl.findAll();
 
-        assertThat(categories)
+        assertThat(transactions)
                 .hasSize(2)
                 .extracting(Transaction::getDescription)
                 .containsExactlyInAnyOrder("Test", "Test2");
@@ -90,15 +87,14 @@ class TransactionDAOImplTest {
     @Test
     @DisplayName("Should successfully update an existing transaction")
     void shouldUpdateTransaction() {
-        Category category = new Category("Entertainment", CategoryType.EXPENSE);
-        categoryDAO.save(category);
+        Category savedCategory = categoryDAOImpl.save(Category.createNew("Entertainment", CategoryType.EXPENSE));
 
-        Transaction saved = transactionDAOImpl.save(Transaction.createNew(category, new BigDecimal("10.00"), "Movie ticket"));
+        Transaction savedTransaction = transactionDAOImpl.save(Transaction.createNew(savedCategory, new BigDecimal("10.00"), "Movie ticket"));
 
-        saved.setAmount(new BigDecimal("20.00"));
-        saved.setDescription("Movie ticket (For two persons)");
+        savedTransaction.setAmount(new BigDecimal("20.00"));
+        savedTransaction.setDescription("Movie ticket (For two persons)");
 
-        boolean isUpdated = transactionDAOImpl.update(saved);
+        boolean isUpdated = transactionDAOImpl.update(savedTransaction);
 
         assertThat(isUpdated).isTrue();
 
@@ -110,10 +106,9 @@ class TransactionDAOImplTest {
     @Test
     @DisplayName("Should return false when updating a non-existent transaction")
     void shouldReturnFalseOnMissingTransaction() {
-        Category category = new Category("Transport", CategoryType.EXPENSE);
-        categoryDAO.save(category);
+        Category savedCategory = categoryDAOImpl.save(Category.createNew("Transport", CategoryType.EXPENSE));
 
-        Transaction nonExistent = Transaction.fromDatabase(12345, category, new BigDecimal("10.00"), "Bus ticket");
+        Transaction nonExistent = Transaction.fromDatabase(12345, savedCategory, new BigDecimal("10.00"), "Bus ticket");
         boolean isUpdated = transactionDAOImpl.update(nonExistent);
 
         assertThat(isUpdated).isFalse();
@@ -122,11 +117,10 @@ class TransactionDAOImplTest {
     @Test
     @DisplayName("Should delete a transaction by its ID")
     void shouldDeleteTransaction() {
-        Category category = new Category("Utilities", CategoryType.EXPENSE);
-        categoryDAO.save(category);
+        Category savedCategory = categoryDAOImpl.save(Category.createNew("Utilities", CategoryType.EXPENSE));
 
-        Transaction saved = transactionDAOImpl.save(Transaction.createNew(category, new BigDecimal("10.00"), "Electricity bill"));
-        transactionDAOImpl.delete(saved.getId());
+        Transaction savedTransaction = transactionDAOImpl.save(Transaction.createNew(savedCategory, new BigDecimal("10.00"), "Electricity bill"));
+        transactionDAOImpl.delete(savedTransaction.getId());
 
         assertThat(transactionDAOImpl.findAll()).isEmpty();
     }

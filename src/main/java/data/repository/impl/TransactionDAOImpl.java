@@ -244,8 +244,7 @@ public class TransactionDAOImpl implements TransactionRepository {
 
     private Transaction mapRowToTransaction(ResultSet rs) throws SQLException {
         CategoryType categoryType = CategoryType.valueOf(rs.getString("type"));
-        Category category = new Category(rs.getString("name"), categoryType);
-        category.setId(rs.getInt("cat_id"));
+        Category category = Category.fromDatabase(rs.getInt("cat_id"), rs.getString("name"), categoryType);
 
         Transaction t = Transaction.fromDatabase(
                 rs.getInt("id"),

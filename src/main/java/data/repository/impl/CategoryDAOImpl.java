@@ -22,7 +22,7 @@ public class CategoryDAOImpl implements CategoryRepository {
     }
 
     @Override
-    public void save(Category category) {
+    public Category save(Category category) {
         String sql = "INSERT INTO categories (name, type) VALUES (?,?)";
 
         try (Connection connection = connectionProvider.get();
@@ -37,7 +37,8 @@ public class CategoryDAOImpl implements CategoryRepository {
             if (affectedRows > 0) {
                 try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
                     if (generatedKeys.next()) {
-                        category.setId(generatedKeys.getInt(1));
+                        int generatedId = generatedKeys.getInt(1);
+                        return Category.fromDatabase(generatedId, category.getName(), category.getType());
                     }
                 }
             }
@@ -48,6 +49,7 @@ public class CategoryDAOImpl implements CategoryRepository {
             throw new RuntimeException("Failed to save category due to a database error", e);
         }
 
+        throw new RuntimeException("Save succeeded but no ID was generated");
     }
 
     @Override
@@ -60,17 +62,8 @@ public class CategoryDAOImpl implements CategoryRepository {
              ResultSet rs = stmt.executeQuery(sql)) {
 
             while (rs.next()) {
-                String typeString = rs.getString("type");
-                CategoryType type = CategoryType.valueOf(typeString);
-
-                Category t = new Category(
-                        rs.getString("name"),
-                        type
-                );
-
-                t.setId(rs.getInt("id"));
-
-                categories.add(t);
+                Category c = mapRowToCategory(rs);
+                categories.add(c);
             }
 
             logger.info("Successfully got {} categories from DB", categories.size());
@@ -129,5 +122,9 @@ public class CategoryDAOImpl implements CategoryRepository {
         } catch (SQLException e) {
             throw new RuntimeException("Failed to delete category due to a database error", e);
         }
+    }
+
+    private Category mapRowToCategory(ResultSet rs) throws SQLException {
+        return Category.fromDatabase(rs.getInt("id"), rs.getString("name"), CategoryType.valueOf(rs.getString("type")));
     }
 }

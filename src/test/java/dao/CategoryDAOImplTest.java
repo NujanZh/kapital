@@ -66,9 +66,9 @@ class CategoryDAOImplTest {
     @Test
     @DisplayName("Should successfully save a category and assign a generated ID")
     void shouldSaveCategory() {
-        Category category = new Category("Food", CategoryType.EXPENSE);
-        categoryDAOImpl.save(category);
-        assertThat(category.getId())
+        Category saved = categoryDAOImpl.save(Category.createNew("Food", CategoryType.EXPENSE));
+
+        assertThat(saved.getId())
                 .as("The generated ID should be greater than 0")
                 .isGreaterThan(0);
     }
@@ -76,9 +76,11 @@ class CategoryDAOImplTest {
     @Test
     @DisplayName("Should throw an exception when saving a category with a duplicate name")
     void shouldThrowExceptionWhenOnDuplicateName() {
-        Category first = new Category("Food", CategoryType.EXPENSE);
-        Category second = new Category("Food", CategoryType.EXPENSE);
+        Category first = Category.createNew("Food", CategoryType.EXPENSE);
+        Category second = Category.createNew("Food", CategoryType.EXPENSE);
+
         categoryDAOImpl.save(first);
+
         assertThatThrownBy(() -> categoryDAOImpl.save(second))
                 .as("Database should prevent duplicate names via UNIQUE constraint")
                 .isInstanceOf(RuntimeException.class);
@@ -87,8 +89,8 @@ class CategoryDAOImplTest {
     @Test
     @DisplayName("Should return all saved categories")
     void shouldFindAllCategories() {
-        categoryDAOImpl.save(new Category("Food", CategoryType.EXPENSE));
-        categoryDAOImpl.save(new Category("Transport", CategoryType.EXPENSE));
+        categoryDAOImpl.save(Category.createNew("Food", CategoryType.EXPENSE));
+        categoryDAOImpl.save(Category.createNew("Transport", CategoryType.EXPENSE));
 
         List<Category> categories = categoryDAOImpl.findAll();
 
@@ -101,11 +103,10 @@ class CategoryDAOImplTest {
     @Test
     @DisplayName("Should successfully update an existing category")
     void shouldUpdateCategory() {
-        Category category = new Category("Food", CategoryType.EXPENSE);
-        categoryDAOImpl.save(category);
+        Category saved = categoryDAOImpl.save(Category.createNew("Food", CategoryType.EXPENSE));
 
-        category.setName("Fine Dining");
-        boolean isUpdated = categoryDAOImpl.update(category);
+        saved.setName("Fine Dining");
+        boolean isUpdated = categoryDAOImpl.update(saved);
 
         assertThat(isUpdated).isTrue();
 
@@ -116,9 +117,7 @@ class CategoryDAOImplTest {
     @Test
     @DisplayName("Should return false when updating a non-existent category")
     void shouldReturnFalseOnMissingCategory() {
-        Category nonExistent = new Category("Non-existent", CategoryType.EXPENSE);
-        nonExistent.setId(12345);
-
+        Category nonExistent = Category.fromDatabase(12345, "Non-existent", CategoryType.EXPENSE);
         boolean isUpdated = categoryDAOImpl.update(nonExistent);
 
         assertThat(isUpdated).isFalse();
@@ -127,9 +126,9 @@ class CategoryDAOImplTest {
     @Test
     @DisplayName("Should delete a category by its ID")
     void shouldDeleteCategory() {
-        Category category = new Category("Food", CategoryType.EXPENSE);
-        categoryDAOImpl.save(category);
-        categoryDAOImpl.delete(category.getId());
+        Category saved = categoryDAOImpl.save(Category.createNew("Food", CategoryType.EXPENSE));
+        categoryDAOImpl.delete(saved.getId());
+
         assertThat(categoryDAOImpl.findAll()).isEmpty();
     }
 }
