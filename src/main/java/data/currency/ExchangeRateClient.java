@@ -27,18 +27,27 @@ public class ExchangeRateClient {
 
         try {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            int statusCode = response.statusCode();
 
-            if (response.statusCode() == 200) {
+            if (statusCode >= 200 && statusCode < 300) {
                 return objectMapper.readValue(response.body(), ExchangeRateResponse.class);
+            }
+
+            if (statusCode == 404) {
+                throw new RuntimeException("Currency pair not found: " + base + " to " + quote);
+            } else if (statusCode == 400 && statusCode < 500) {
+                throw new RuntimeException("Invalid client request (" + statusCode + "): " + response.body());
+            } else if (statusCode >= 500) {
+                throw new RuntimeException("Downstream exchange rate API is currently unavailable (" + statusCode + ")");
             } else {
-                throw new RuntimeException("Failed to get currency rate");
+                throw new RuntimeException("Unexpected response status from exchange rate API: " + statusCode);
             }
 
         } catch (IOException e) {
-            throw new RuntimeException("Failed to get currency rate", e);
+            throw new RuntimeException("Network error communicating with exchange rate API", e);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new RuntimeException("Failed to get currency rate", e);
+            throw new RuntimeException("Thread interrupted while fetching currency rate", e);
         }
     }
 }

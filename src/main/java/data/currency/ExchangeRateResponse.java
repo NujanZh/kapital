@@ -1,12 +1,21 @@
 package data.currency;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.math.BigDecimal;
 
 public class ExchangeRateResponse {
 
+    @JsonProperty("date")
     private String date;
+
+    @JsonProperty("base")
     private String base;
+
+    @JsonProperty("quote")
     private String quote;
+
+    @JsonProperty("rates")
     private BigDecimal rate;
 
     public String getDate() {
