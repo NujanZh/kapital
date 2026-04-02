@@ -15,7 +15,7 @@ public class ExchangeRateResponse {
     @JsonProperty("quote")
     private String quote;
 
-    @JsonProperty("rates")
+    @JsonProperty("rate")
     private BigDecimal rate;
 
     public String getDate() {

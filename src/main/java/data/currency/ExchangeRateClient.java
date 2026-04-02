@@ -35,7 +35,7 @@ public class ExchangeRateClient {
 
             if (statusCode == 404) {
                 throw new RuntimeException("Currency pair not found: " + base + " to " + quote);
-            } else if (statusCode == 400 && statusCode < 500) {
+            } else if (statusCode >= 400 && statusCode < 500) {
                 throw new RuntimeException("Invalid client request (" + statusCode + "): " + response.body());
             } else if (statusCode >= 500) {
                 throw new RuntimeException("Downstream exchange rate API is currently unavailable (" + statusCode + ")");
