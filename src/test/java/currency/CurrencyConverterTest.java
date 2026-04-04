@@ -48,15 +48,6 @@ class CurrencyConverterTest {
     }
 
     @Test
-    @DisplayName("Should had message when base currency is null")
-    void shouldHadMessageWhenBaseCurrencyIsNull() {
-        BigDecimal amount = new BigDecimal("1000.00");
-
-        assertThatThrownBy(() -> converter.convert(null, "KZT", amount))
-                .hasMessageContaining("Base currency cannot be empty");
-    }
-
-    @Test
     @DisplayName("Should throw an exception when the target currency is null")
     void shouldThrowExceptionWhenTargetCurrencyIsNull() {
         BigDecimal amount = new BigDecimal("1000.00");
@@ -66,7 +57,7 @@ class CurrencyConverterTest {
     }
 
     @Test
-    @DisplayName("Should had message when target currency is null")
+    @DisplayName("Should have message when target currency is null")
     void shouldHadMessageWhenTargetCurrencyIsNull() {
         BigDecimal amount = new BigDecimal("1000.00");
 

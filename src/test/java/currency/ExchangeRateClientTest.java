@@ -7,6 +7,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -23,9 +25,19 @@ class ExchangeRateClientTest {
     @DisplayName("Should successfully return ExchangeRateResponse with not null rate")
     void shouldReturnExchangeRateResponse() {
         ExchangeRateResponse response = client.getCurrencyRate("CZK", "KZT");
+
+        assertThat(response.getBase())
+                .as("The base should be CZK")
+                .isEqualTo("CZK");
+
+        assertThat(response.getQuote())
+                .as("The quote should be KZT")
+                .isEqualTo("KZT");
+
         assertThat(response.getRate())
                 .as("The rate should not be null")
-                .isNotNull();
+                .isNotNull()
+                .isGreaterThan(BigDecimal.ZERO);
     }
 
     @Test
