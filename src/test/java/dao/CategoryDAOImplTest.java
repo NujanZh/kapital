@@ -24,21 +24,9 @@ class CategoryDAOImplTest {
 
     @BeforeEach
     void setUp() throws SQLException {
-        // 1. URL С ИНИЦИАЛИЗАЦИЕЙ (INIT)
-        // Создаем первичное подключение к in-memory базе H2.
-        // Здесь мы специально используем параметр INIT=RUNSCRIPT, чтобы при установке соединения
-        // выполнился скрипт init.sql (который делает DROP TABLE IF EXISTS и CREATE TABLE).
-        // Это подключение (keepAliveConnection) мы сохраняем и не закрываем до конца теста (tearDown),
-        // чтобы база данных (mem:testdb) "жила" в оперативной памяти и не удалилась.
         String initUrl = "jdbc:h2:mem:testdb;MODE=MariaDB;INIT=RUNSCRIPT FROM 'classpath:database/init.sql';DB_CLOSE_DELAY=-1";
         keepAliveConnection = DriverManager.getConnection(initUrl);
 
-        // 2. ЧИСТЫЙ URL ДЛЯ РАБОТЫ DAO (БЕЗ INIT)
-        // Почему это важно: DAO каждый раз запрашивает новое подключение (вызывает Supplier)
-        // для выполнения SQL-запросов (save, findAll, update).
-        // Если бы мы передали сюда URL с параметром INIT, то перед каждым отдельным запросом
-        // H2 заново бы выполняла скрипт init.sql. То есть база бы сбрасывалась и удаляла все данные,
-        // которые мы сохранили строчкой выше. Тесты бы падали из-за того, что ищут данные в пустой БД.
         String daoUrl = "jdbc:h2:mem:testdb;MODE=MariaDB;DB_CLOSE_DELAY=-1";
 
         Supplier<Connection> connectionSupplier = () -> {

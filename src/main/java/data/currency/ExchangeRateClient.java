@@ -1,6 +1,9 @@
 package data.currency;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import exception.CurrencyNotFoundException;
+import exception.ExchangeRateException;
+import exception.ExchangeRateServerException;
 
 import java.io.IOException;
 import java.net.URI;
@@ -33,21 +36,21 @@ public class ExchangeRateClient {
                 return objectMapper.readValue(response.body(), ExchangeRateResponse.class);
             }
 
-            if (statusCode == 404) {
-                throw new RuntimeException("Currency pair not found: " + base + " to " + quote);
+            if (statusCode == 404 || statusCode == 422) {
+                throw new CurrencyNotFoundException("Invalid or unknown currency: " + base + " or " + quote);
             } else if (statusCode >= 400 && statusCode < 500) {
-                throw new RuntimeException("Invalid client request (" + statusCode + "): " + response.body());
+                throw new ExchangeRateException("Invalid client request (" + statusCode + "): " + response.body());
             } else if (statusCode >= 500) {
-                throw new RuntimeException("Downstream exchange rate API is currently unavailable (" + statusCode + ")");
+                throw new ExchangeRateServerException("Exchange rate API unavailable (" + statusCode + ")");
             } else {
-                throw new RuntimeException("Unexpected response status from exchange rate API: " + statusCode);
+                throw new ExchangeRateException("Unexpected status code: " + statusCode);
             }
 
         } catch (IOException e) {
-            throw new RuntimeException("Network error communicating with exchange rate API", e);
+            throw new ExchangeRateException("Network error communicating with exchange rate API", e);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new RuntimeException("Thread interrupted while fetching currency rate", e);
+            throw new ExchangeRateException("Thread interrupted while fetching currency rate", e);
         }
     }
 }
