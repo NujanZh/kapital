@@ -18,4 +18,10 @@ public class CurrencyConverter {
 
         return amount.multiply(exchangeRateClient.getCurrencyRate(base, quote).getRate()).setScale(2, RoundingMode.HALF_UP);
     }
+
+    public BigDecimal getRate(String base, String quote) {
+        if (base == null || base.trim().isEmpty()) throw new IllegalArgumentException("Base currency cannot be empty");
+        if (quote == null || quote.trim().isEmpty()) throw new IllegalArgumentException("Quote currency cannot be empty");
+        return exchangeRateClient.getCurrencyRate(base, quote).getRate();
+    }
 }
