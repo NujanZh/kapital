@@ -24,7 +24,7 @@ public class TransactionDAOImpl implements TransactionRepository {
 
     @Override
     public Transaction save(Transaction transaction) {
-        String sql = "INSERT INTO transactions (category_id, amount, description) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO transactions (category_id, amount, description, currency) VALUES (?, ?, ?, ?)";
 
         try (Connection connection = connectionSupplier.get();
              PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -32,6 +32,7 @@ public class TransactionDAOImpl implements TransactionRepository {
             pstmt.setInt(1, transaction.getCategory().getId());
             pstmt.setBigDecimal(2, transaction.getAmount());
             pstmt.setString(3, transaction.getDescription());
+            pstmt.setString(4, transaction.getCurrency());
 
             int affectedRows = pstmt.executeUpdate();
 
@@ -44,7 +45,8 @@ public class TransactionDAOImpl implements TransactionRepository {
                                 generatedId,
                                 transaction.getCategory(),
                                 transaction.getAmount(),
-                                transaction.getDescription()
+                                transaction.getDescription(),
+                                transaction.getCurrency()
                         );
                     }
                 }
@@ -61,7 +63,7 @@ public class TransactionDAOImpl implements TransactionRepository {
     @Override
     public List<Transaction> findAll() {
         var transactions = new ArrayList<Transaction>();
-        String sql = "SELECT t.id, t.category_id, t.amount, t.description, t.transaction_date, c.id as cat_id, c.name, c.type " +
+        String sql = "SELECT t.id, t.category_id, t.amount, t.description, t.transaction_date, t.currency, c.id as cat_id, c.name, c.type " +
                 "FROM transactions t " +
                 "JOIN categories c ON c.id = t.category_id";
 
@@ -85,15 +87,16 @@ public class TransactionDAOImpl implements TransactionRepository {
 
     @Override
     public boolean update(Transaction transaction) {
-        String sql = "UPDATE transactions SET amount = ?, description = ?, category_id = ? WHERE id = ?";
+        String sql = "UPDATE transactions SET amount = ?, description = ?, currency = ?, category_id = ? WHERE id = ?";
 
         try (Connection connection = connectionSupplier.get();
              PreparedStatement pstmt = connection.prepareStatement(sql)) {
 
             pstmt.setBigDecimal(1, transaction.getAmount());
             pstmt.setString(2, transaction.getDescription());
-            pstmt.setInt(3, transaction.getCategory().getId());
-            pstmt.setInt(4, transaction.getId());
+            pstmt.setString(3, transaction.getCurrency());
+            pstmt.setInt(4, transaction.getCategory().getId());
+            pstmt.setInt(5, transaction.getId());
 
             logger.debug("Executing SQL: {} for transaction ID={}", sql, transaction.getId());
 
@@ -250,7 +253,8 @@ public class TransactionDAOImpl implements TransactionRepository {
                 rs.getInt("id"),
                 category,
                 rs.getBigDecimal("amount"),
-                rs.getString("description")
+                rs.getString("description"),
+                rs.getString("currency")
         );
 
         Timestamp timestamp = rs.getTimestamp("transaction_date");

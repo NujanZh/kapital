@@ -21,10 +21,10 @@ public class TransactionService {
         this.transactionRepository = transactionRepository;
     }
 
-    public Transaction createTransaction(Category category, BigDecimal amount, String description) {
+    public Transaction createTransaction(Category category, BigDecimal amount, String description, String currency) {
         logger.debug("Attempting to create new transaction");
 
-        Transaction transaction = Transaction.createNew(category, amount, description);
+        Transaction transaction = Transaction.createNew(category, amount, description, currency);
         return transactionRepository.save(transaction);
     }
 

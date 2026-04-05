@@ -9,30 +9,34 @@ public class Transaction {
     private Category category;
     private BigDecimal amount;
     private String description;
+    private final String currency;
     private LocalDateTime transactionDate;
 
-    private Transaction(int id, Category category, BigDecimal amount, String description) {
-        validate(category, amount, description);
+    private Transaction(int id, Category category, BigDecimal amount, String description, String currency) {
+        validate(category, amount, description, currency);
         this.id = id;
         this.category= category;
         this.amount = amount;
         this.description = description;
+        this.currency = currency;
     }
 
-    public static Transaction createNew(Category category, BigDecimal amount, String description) {
-        return new Transaction(0, category, amount, description);
+    public static Transaction createNew(Category category, BigDecimal amount, String description, String currency) {
+        return new Transaction(0, category, amount, description, currency);
     }
 
-    public static Transaction fromDatabase(int id, Category category, BigDecimal amount, String description) {
+    public static Transaction fromDatabase(int id, Category category, BigDecimal amount, String description, String currency) {
         if (id <= 0) throw new IllegalArgumentException("Database transaction must have a positive ID");
-        return new Transaction(id, category, amount, description);
+        return new Transaction(id, category, amount, description, currency);
     }
 
-    private static void validate(Category category, BigDecimal amount, String description) {
+    private static void validate(Category category, BigDecimal amount, String description, String currency) {
         if (category == null) throw new IllegalArgumentException("Category cannot be null");
         if (category.getId() <= 0) throw new IllegalArgumentException("Category must be persisted before use");
         if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) throw new IllegalArgumentException("Amount must be positive");
         if (description == null || description.trim().isEmpty()) throw new IllegalArgumentException("Description cannot be empty");
+        if (currency == null || currency.trim().isEmpty()) throw new IllegalArgumentException("Currency cannot be empty");
+        if (currency.length() != 3) throw new IllegalArgumentException("Currency must be 3 characters long");
     }
 
     public int getId() {
@@ -69,6 +73,10 @@ public class Transaction {
     public void setDescription(String description) {
         if (description == null || description.trim().isEmpty()) throw new IllegalArgumentException("Description cannot be empty");
         this.description = description;
+    }
+
+    public String getCurrency() {
+        return currency;
     }
 
     public LocalDateTime getTransactionDate() {

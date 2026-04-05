@@ -11,6 +11,7 @@ CREATE TABLE transactions (
     id INT AUTO_INCREMENT PRIMARY KEY,
     category_id INT NOT NULL,
     amount DECIMAL(12, 2) NOT NULL,
+    currency VARCHAR(3) NOT NULL DEFAULT 'CZK',
     description VARCHAR(255),
     transaction_date DATETIME DEFAULT CURRENT_TIMESTAMP,
 
