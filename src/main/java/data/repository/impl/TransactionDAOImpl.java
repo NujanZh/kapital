@@ -167,6 +167,37 @@ public class TransactionDAOImpl implements TransactionRepository {
     }
 
     @Override
+    public List<Transaction> getTransactionsByMonthAndYear(int year, Month month) {
+        List<Transaction> transactions = new ArrayList<>();
+        String sql = """
+                SELECT t.id, t.category_id, t.amount, t.description, t.transaction_date, t.currency c.id as cat_id, c.name, c.type
+                FROM transactions t
+                JOIN categories c ON c.id = t.category_id
+                WHERE c.type = 'EXPENSE'
+                    AND YEAR(t.transaction_date) = ?
+                    AND MONTH(t.transaction_date) = ?
+                """;
+
+        try (Connection connection = connectionSupplier.get();
+             PreparedStatement pstmt = connection.prepareStatement(sql)) {
+
+            pstmt.setInt(1, year);
+            pstmt.setInt(2, month.getValue());
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    transactions.add(mapRowToTransaction(rs));
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to get transactions by month and year due to a database error", e);
+        }
+
+        return transactions;
+    }
+
+    @Override
     public Optional<Transaction> getLargestExpense() {
         String sql = """
                 SELECT t.id, t.category_id, t.amount, t.description, t.transaction_date,

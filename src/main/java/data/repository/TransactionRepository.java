@@ -15,6 +15,7 @@ public interface TransactionRepository {
     void delete(int id);
 
     BigDecimal getTotalExpensesByMonthAndYear(int year, Month month);
+    List<Transaction> getTransactionsByMonthAndYear(int year, Month month);
     Optional<Transaction> getLargestExpense();
     Map<String, BigDecimal> getExpensesByCategory();
     BigDecimal calculateBalance();
