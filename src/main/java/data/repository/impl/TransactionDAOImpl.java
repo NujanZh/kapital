@@ -170,7 +170,7 @@ public class TransactionDAOImpl implements TransactionRepository {
     public List<Transaction> getTransactionsByMonthAndYear(int year, Month month) {
         List<Transaction> transactions = new ArrayList<>();
         String sql = """
-                SELECT t.id, t.category_id, t.amount, t.description, t.transaction_date, t.currency c.id as cat_id, c.name, c.type
+                SELECT t.id, t.category_id, t.amount, t.description, t.transaction_date, t.currency, c.id as cat_id, c.name, c.type
                 FROM transactions t
                 JOIN categories c ON c.id = t.category_id
                 WHERE c.type = 'EXPENSE'
