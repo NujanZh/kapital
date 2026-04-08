@@ -1,6 +1,4 @@
-package data.service;
-
-import data.export.TransactionReportLine;
+package data.export;
 
 import java.math.BigDecimal;
 import java.time.Month;

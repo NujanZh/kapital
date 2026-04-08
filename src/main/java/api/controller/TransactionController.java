@@ -32,6 +32,12 @@ public class TransactionController implements EndpointGroup {
         path("/api/transactions", () -> {
             get(this::getAll);
             post(this::create);
+
+            path("/monthly-expenses", () -> get(this::getMonthlyExpenses));
+            path("/largest-expense", () -> get(this::getLargestExpense));
+            path("/by-category", () -> get(this::getExpensesByCategory));
+            path("/balance", () -> get(this::getBalance));
+
             path("/{id}", () -> {
                 put(this::update);
                 delete(this::deleteTransaction);
