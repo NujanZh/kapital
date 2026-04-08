@@ -11,6 +11,7 @@ import java.util.Optional;
 public interface TransactionRepository {
     Transaction save(Transaction transaction);
     List<Transaction> findAll();
+    Transaction findById(int id);
     boolean update(Transaction transaction);
     void delete(int id);
 

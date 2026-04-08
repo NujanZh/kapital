@@ -86,6 +86,32 @@ public class TransactionDAOImpl implements TransactionRepository {
     }
 
     @Override
+    public Transaction findById(int id) {
+        String sql = """
+                SELECT t.id, t.category_id, t.amount, t.description, t.transaction_date, t.currency, c.id as cat_id, c.name, c.type 
+                FROM transactions t 
+                JOIN categories c ON c.id = t.category_id 
+                    WHERE t.id = ?
+                """;
+
+        try (Connection connection = connectionSupplier.get();
+             PreparedStatement pstmp = connection.prepareStatement(sql)
+        ) {
+            pstmp.setInt(1, id);
+
+            try (ResultSet rs = pstmp.executeQuery()) {
+                if (rs.next()) {
+                    return mapRowToTransaction(rs);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to get transaction due to a database error", e);
+        }
+
+        throw new RuntimeException("No transaction found with id: " + id);
+    }
+
+    @Override
     public boolean update(Transaction transaction) {
         String sql = "UPDATE transactions SET amount = ?, description = ?, currency = ?, category_id = ? WHERE id = ?";
 

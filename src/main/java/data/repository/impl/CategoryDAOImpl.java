@@ -76,6 +76,31 @@ public class CategoryDAOImpl implements CategoryRepository {
     }
 
     @Override
+    public Category findById(int id) {
+        String sql = """
+                    SELECT id, name, type 
+                    FROM categories 
+                    WHERE id = ?
+                """;
+
+        try (Connection connection = connectionProvider.get();
+             PreparedStatement pstmt = connection.prepareStatement(sql)) {
+
+            pstmt.setInt(1, id);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return mapRowToCategory(rs);
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to get category due to a database error", e);
+        }
+
+        throw new RuntimeException("No category found with id: " + id);
+    }
+
+    @Override
     public boolean update(Category category) {
         String sql = "UPDATE categories SET name = ?, type = ? WHERE id = ?";
 

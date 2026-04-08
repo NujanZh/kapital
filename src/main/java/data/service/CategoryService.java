@@ -29,6 +29,11 @@ public class CategoryService {
         return categoryRepository.findAll();
     }
 
+    public Category getCategoryById(int id) {
+        logger.debug("Attempting to get category with ID: {}", id);
+        return categoryRepository.findById(id);
+    }
+
     public boolean updateCategory(Category category) {
         logger.debug("Attempting to update category");
 

@@ -49,9 +49,9 @@ public class CategoryController implements EndpointGroup {
             .json(result);
     }
 
-    private void update(Context ctx) {
-        int id = ctx.pathParamAsClass("id", Integer.class).get();
-        UpdateCategoryRequest request = ctx.bodyAsClass(UpdateCategoryRequest.class);
+    private void update(Context context) {
+        int id = context.pathParamAsClass("id", Integer.class).get();
+        UpdateCategoryRequest request = context.bodyAsClass(UpdateCategoryRequest.class);
 
         CategoryType type = CategoryType.valueOf(request.type().toUpperCase());
         Category category = Category.fromDatabase(id, request.name(), type);
@@ -59,15 +59,15 @@ public class CategoryController implements EndpointGroup {
         boolean updated = categoryService.updateCategory(category);
 
         if (updated) {
-            ctx.json(category);
+            context.json(category);
         } else {
-            ctx.status(404).json(Map.of("error", "Category not found"));
+            context.status(404).json(Map.of("error", "Category not found"));
         }
     }
 
-    private void deleteCategory(Context ctx) {
-        int id = ctx.pathParamAsClass("id", Integer.class).get();
+    private void deleteCategory(Context context) {
+        int id = context.pathParamAsClass("id", Integer.class).get();
         categoryService.deleteCategory(id);
-        ctx.status(204);
+        context.status(204);
     }
 }

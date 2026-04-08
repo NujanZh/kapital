@@ -33,6 +33,14 @@ public class TransactionService {
         return transactionRepository.findAll();
     }
 
+    public Transaction getTransactionById(int id) {
+        logger.debug("Attempting to get transaction with ID: {}", id);
+        if (id <= 0) {
+            throw new IllegalArgumentException("Transaction ID must be positive");
+        }
+        return transactionRepository.findById(id);
+    }
+
     public boolean updateTransaction(Transaction transaction) {
         logger.debug("Attempting to update transaction");
 
