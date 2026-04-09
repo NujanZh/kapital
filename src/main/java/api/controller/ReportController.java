@@ -60,9 +60,14 @@ public class ReportController implements EndpointGroup {
             context.result(fileBytes);
 
         } catch (Exception e) {
-            context.status(400).json(Map.of(
-                    "error", "Failed to generate report. Ensure ?year=YYYY&month=MM are valid.",
+            context.status(500).json(Map.of(
+                    "error", "Failed to generate report.",
                     "details", e.getMessage()
+            ));
+        } catch (Throwable t) {
+            context.status(500).json(Map.of(
+                    "error", "Failed to generate report.",
+                    "details", t.getMessage() == null ? t.getClass().getSimpleName() : t.getMessage()
             ));
         }
     }

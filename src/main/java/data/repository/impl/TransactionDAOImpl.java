@@ -226,7 +226,7 @@ public class TransactionDAOImpl implements TransactionRepository {
     @Override
     public Optional<Transaction> getLargestExpense() {
         String sql = """
-                SELECT t.id, t.category_id, t.amount, t.description, t.transaction_date,
+                SELECT t.id, t.category_id, t.amount, t.description, t.transaction_date, t.currency,
                        c.id as cat_id, c.name, c.type
                 FROM transactions t
                 JOIN categories c ON c.id = t.category_id
